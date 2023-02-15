@@ -10,7 +10,7 @@ FString UCharacterItemAsset::GetIdentifierString() const
 
 FPrimaryAssetId UCharacterItemAsset::GetPrimaryAssetId() const
 {
-	return Super::GetPrimaryAssetId();
+	return FPrimaryAssetId(ItemType, GetFName());
 	/*
 	UClass* ThisClass = GetClass();
 
