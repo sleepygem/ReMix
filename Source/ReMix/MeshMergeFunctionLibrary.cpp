@@ -1,9 +1,33 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "MeshMergeFunctionLibrary.h"
-#include "SkeletalMeshMerge.h"
+#include "SkeletalMeshMergeModified.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Engine/SkeletalMesh.h"
 #include "Animation/Skeleton.h"
+
+static void ToMergeParams(const TArray<FMaterialOverride>& InMatOverrides, TArray<FSkelMeshMaterialOverride>& OutMatOverrides)
+{
+    if (InMatOverrides.Num() > 0)
+    {
+        OutMatOverrides.Empty();
+        UE_LOG(LogTemp, Warning, TEXT("Converting Material Overrides to Merge Params, Size (%d)"), OutMatOverrides.Num());
+        for (int32 i = 0; i < InMatOverrides.Num(); ++i)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("{%d}---"), i);
+
+            FSkelMeshMaterialOverride NewMaterialOverride;
+            NewMaterialOverride.Materials = InMatOverrides[i].Materials;
+
+            OutMatOverrides.Add(NewMaterialOverride);
+
+            for (FSkeletalMaterial Mat : NewMaterialOverride.Materials)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("       {%s}"), *Mat.MaterialSlotName.ToString());
+            }
+        }
+    }
+};
+
 static void ToMergeParams(const TArray<FSkelMeshMergeSectionMapping_BP>& InSectionMappings, TArray<FSkelMeshMergeSectionMapping>& OutSectionMappings)
 {
     if (InSectionMappings.Num() > 0)
@@ -52,7 +76,7 @@ USkeletalMesh* UMeshMergeFunctionLibrary::MergeMeshes(const FSkeletalMeshMergePa
 
     /*
     * Overriding source meshes with supplied materials if any were given
-    */
+    
     if (Params.MeshesToMerge.Num() == MaterialOverrides.Num())
     {
         for (int i = 0; i < MeshesToMergeCopy.Num(); i++)
@@ -71,14 +95,16 @@ USkeletalMesh* UMeshMergeFunctionLibrary::MergeMeshes(const FSkeletalMeshMergePa
     {
         UE_LOG(LogTemp, Warning, TEXT("Number of material overrides and meshes not matching (Overrides: %d, Meshes: %d)"), MaterialOverrides.Num(), Params.MeshesToMerge.Num());
     }
-
+    */
     EMeshBufferAccess BufferAccess = Params.bNeedsCpuAccess ?
         EMeshBufferAccess::ForceCPUAndGPU :
         EMeshBufferAccess::Default;
     TArray<FSkelMeshMergeSectionMapping> SectionMappings;
     TArray<FSkelMeshMergeUVTransforms> UvTransforms;
+    TArray<FSkelMeshMaterialOverride> ConvertedMaterialOverrides;
     ToMergeParams(Params.MeshSectionMappings, SectionMappings);
     ToMergeParams(Params.UVTransformsPerMesh, UvTransforms);
+    ToMergeParams(MaterialOverrides, ConvertedMaterialOverrides);
     bool bRunDuplicateCheck = false;
     USkeletalMesh* BaseMesh = NewObject<USkeletalMesh>();
     if (Params.Skeleton && Params.bSkeletonBefore)
@@ -100,7 +126,7 @@ USkeletalMesh* UMeshMergeFunctionLibrary::MergeMeshes(const FSkeletalMeshMergePa
             }
         }
     }
-    FSkeletalMeshMerge Merger(BaseMesh, MeshesToMergeCopy, SectionMappings, Params.StripTopLODS, BufferAccess, UvTransforms.GetData());
+    FSkeletalMeshMergeModified Merger(BaseMesh, MeshesToMergeCopy, SectionMappings, ConvertedMaterialOverrides, Params.StripTopLODS, BufferAccess, UvTransforms.GetData());
     if (!Merger.DoMerge())
     {
         UE_LOG(LogTemp, Warning, TEXT("Merge failed!"));
