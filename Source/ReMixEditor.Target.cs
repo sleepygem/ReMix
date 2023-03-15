@@ -9,7 +9,8 @@ public class ReMixEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-
+        IOSPlatform.bGeneratedSYM = true;
+        bDisableDebugInfo = true;
 		ExtraModuleNames.AddRange( new string[] { "ReMix" } );
 	}
 }

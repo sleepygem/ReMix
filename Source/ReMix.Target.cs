@@ -9,7 +9,9 @@ public class ReMixTarget : TargetRules
 	{
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-
+		IOSPlatform.bGeneratedSYM = true;
+		bDisableDebugInfo = true;
 		ExtraModuleNames.AddRange( new string[] { "ReMix" } );
+
 	}
 }

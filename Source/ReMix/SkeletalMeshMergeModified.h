@@ -138,7 +138,10 @@ private:
 
 	/** Number of high LODs to remove from input meshes. */
 	int32 StripTopLODs;
-
+    
+    /** optional array to override materials in each mesh */
+    const TArray<FSkelMeshMaterialOverride>& MaterialOverrides;
+    
 	/** Whether or not the resulting mesh needs to be accessed by the CPU (e.g. for particle spawning).*/
 	EMeshBufferAccess MeshBufferAccess;
 
@@ -161,8 +164,7 @@ private:
 	/** optional array to transform UVs in each source mesh */
 	const FSkelMeshMergeUVTransforms* SectionUVTransforms;
 
-	/** optional array to override materials in each mesh */
-	const TArray<FSkelMeshMaterialOverride>& MaterialOverrides;
+	
 
 	/** Matches the Materials array in the final mesh - used for creating the right number of Material slots. */
 	TArray<int32>	MaterialIds;
