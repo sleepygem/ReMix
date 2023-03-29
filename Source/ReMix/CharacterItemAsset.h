@@ -7,6 +7,44 @@
 #include "CharacterItemAsset.generated.h"
 
 /**
+* Defines an exposed colour parameter for a material used by a CharacterItemAsset
+*/
+USTRUCT(BlueprintType)
+struct FColourParameter
+{
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FText DisplayName;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FName MaterialSlot;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FName ParameterName;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bUseStandardColourSet;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FLinearColor> AdditionalColourOptions;
+
+	FLinearColor GetRandomColour()
+	{
+		const int32 ColourNum = AdditionalColourOptions.Num();
+		if (ColourNum > 0)
+		{
+			return AdditionalColourOptions[FMath::RandRange(0, ColourNum - 1)];
+		}
+		return FLinearColor();
+	}
+
+	FColourParameter()
+	{
+		bUseStandardColourSet = true;
+	}
+};
+/**
  * 
  */
 UCLASS(BlueprintType)
@@ -18,6 +56,9 @@ public:
 	/** Type of this item, set in native parent class */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item)
 	FPrimaryAssetType ItemType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "User Parameters")
+	TArray<FColourParameter> ColourParameters;
 
 	/** Returns the logical name, equivalent to the primary asset id */
 	UFUNCTION(BlueprintCallable, Category = Item)
