@@ -8,6 +8,49 @@
 #include "MaterialParameterFunctionLibrary.generated.h"
 
 USTRUCT(BlueprintType)
+struct FColourParameterSerializable
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FName ParameterName;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FLinearColor Color;
+
+	FColourParameterSerializable()
+	{
+
+	}
+
+	FColourParameterSerializable(FName InParamName, FLinearColor InColor)
+	{
+		ParameterName = InParamName;
+		Color = InColor;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FItemMaterialSettingsSerializable
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FName MaterialSlot;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UMaterialInterface* Material;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TArray<FColourParameterSerializable> ColourParameters;
+
+	FItemMaterialSettingsSerializable()
+	{
+
+	}
+};
+
+USTRUCT(BlueprintType)
 struct FItemMaterialSettings
 {
 	GENERATED_BODY()
@@ -47,4 +90,13 @@ class REMIX_API UMaterialParameterFunctionLibrary : public UBlueprintFunctionLib
 	UFUNCTION(BlueprintCallable)
 	static bool GetAssociatedParameters(UObject* WorldContextObject, UCharacterItemAsset* ItemAsset, FName MaterialSlot, UMaterialInterface* Material, bool bRandomizeValues, 
 		FItemMaterialSettings& MaterialSettings);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FItemMaterialSettingsSerializable> MakeMaterialSettingsSerializable(UPARAM(ref) TMap<FName, FItemMaterialSettings>& MaterialSettings);
+
+	UFUNCTION(BlueprintCallable)
+	static TMap<FName, FItemMaterialSettings> MakeInstancedMaterialSettings(UObject* WorldContextObject, UPARAM(ref) TArray<FItemMaterialSettingsSerializable>& SerializedSettings);
+
+	UFUNCTION(BLueprintCallable, BlueprintPure, meta=(CompactNodeTitle = "FindRef"))
+	static bool FindItemMaterialSettings(FName Name, UPARAM(ref) TMap<FName, FItemMaterialSettings>& MaterialSettings, FItemMaterialSettings& OutSettings);
 };
