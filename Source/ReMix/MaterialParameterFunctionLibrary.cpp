@@ -55,8 +55,14 @@ TArray<FItemMaterialSettingsSerializable> UMaterialParameterFunctionLibrary::Mak
 	for (const TPair<FName, FItemMaterialSettings>& CurrentMaterialSettings : MaterialSettings)
 	{
 		FItemMaterialSettingsSerializable NewSerializableSettings;
-
-		NewSerializableSettings.Material = CurrentMaterialSettings.Value.Material->GetBaseMaterial();
+		if (CurrentMaterialSettings.Value.Material != nullptr)
+		{
+			NewSerializableSettings.Material = CurrentMaterialSettings.Value.Material->GetBaseMaterial();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Material for slot %s is nullptr, can't get base material"), *CurrentMaterialSettings.Key.ToString());
+		}
 		NewSerializableSettings.MaterialSlot = CurrentMaterialSettings.Key;
 		TArray<FColourParameterSerializable> NewColourParameters;
 
