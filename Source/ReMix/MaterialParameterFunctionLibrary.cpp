@@ -31,7 +31,21 @@ bool UMaterialParameterFunctionLibrary::GetAssociatedParameters(UObject* WorldCo
 					bHasAnyParameters = true;
 				}
 
-				const FLinearColor NewColour = bRandomizeValues ? ColourParam.GetRandomColour() : FLinearColor(0.f, 0.f, 0.f, 0.f);
+				//Try to get the material's default value for this parameter
+				FLinearColor DefaultColour;
+				const bool bHasDefaultValue = Material->GetVectorParameterValue(FHashedMaterialParameterInfo(ColourParam.ParameterName, EMaterialParameterAssociation::GlobalParameter),
+					DefaultColour);
+				if (!bHasDefaultValue)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Failed to get default value for %s parameter in Material: %s"), *ColourParam.ParameterName.ToString(), *Material->GetFName().ToString());
+					DefaultColour = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Default value for parameter %s in Material: %s retrieved as %s"), *ColourParam.ParameterName.ToString(), *Material->GetFName().ToString(),
+						*DefaultColour.ToString())
+				}
+				const FLinearColor NewColour = bRandomizeValues ? ColourParam.GetRandomColour() : DefaultColour;
 
 				if (bRandomizeValues)
 				{
@@ -69,7 +83,7 @@ TArray<FItemMaterialSettingsSerializable> UMaterialParameterFunctionLibrary::Mak
 		for (const TPair<FName, FLinearColor>& pair : CurrentMaterialSettings.Value.ColourParameters)
 		{
 			NewColourParameters.Add(FColourParameterSerializable(pair.Key, pair.Value));
-			UE_LOG(LogTemp, Warning, TEXT("Added colour parameter of value %s"), *pair.Value.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("Parameter %s serialized with value %s"), *pair.Key.ToString(), *pair.Value.ToString());
 		}
 		NewSerializableSettings.ColourParameters = NewColourParameters;
 		ConvertedMaterialSettings.Add(NewSerializableSettings);
